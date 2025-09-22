@@ -23,10 +23,25 @@ class TimidAgent(Agent):
 
         If the pacman is not in danger, we return Directions.STOP
         If the pacman is in danger we return the direction to the ghost.
+        return directions.stop
         """
 
-        # Your code
-        raise NotImplemented
+        pacmanPos = pacman.getPositin()
+        isScared = ghost.scaredTimer > 0
+        ghostPos = ghost.getPosition()
+
+        #First, if the pacman is not in danger, we return Directions.STOP
+        if isScared:
+            return Directions.STOP
+        if pacmanPos[0] == ghostPos[0]: ##If the pacman and ghost are in same row and column
+            if abs(pacmanPos[1] - ghostPos[1]) <= dist: #If the distance is less than or equal to Y dist
+                return Directions.NORTH if ghostPos[1] > pacmanPos[1] else Directions.SOUTH
+        elif pacmanPos[1] == ghostPos[1]: ##If the pacman and ghost are in same row and column
+            if abs(pacmanPos[0] - ghostPos[0]) <= dist: #If the distance is less than or equal to X distance
+                return Directions.EAST if ghostPos[0] > pacmanPos[0] else Directions.WEST
+        
+        return Directions.STOP
+
     
     def getAction(self, state):
         """
@@ -34,5 +49,19 @@ class TimidAgent(Agent):
         
         Fill in appropriate documentation
         """
+
+        pacman = state.getPacmanState()
+        ghostStates = state.getGhostStates()
+
+
+        for ghost in ghostStates:
+            ##If direction.stop was returned
+            inDanger = self.inDanger(pacman, ghost)
+            if inDanger != Directions.STOP:
+                ##TODO: Check if is a legal move 
+                
+                return Directions.REVERSE(inDanger) #Return the opposite direction of the danger so we can head that direction
+
+
 
         raise NotImplemented

@@ -26,7 +26,7 @@ class TimidAgent(Agent):
         return directions.stop
         """
 
-        pacmanPos = pacman.getPositin()
+        pacmanPos = pacman.getPosition()
         isScared = ghost.scaredTimer > 0
         ghostPos = ghost.getPosition()
 
@@ -52,16 +52,47 @@ class TimidAgent(Agent):
 
         pacman = state.getPacmanState()
         ghostStates = state.getGhostStates()
+        heading = pacman.getDirection()
+        legal = state.getLegalPacmanActions()
 
 
         for ghost in ghostStates:
             ##If direction.stop was returned
             inDanger = self.inDanger(pacman, ghost)
             if inDanger != Directions.STOP:
-                ##TODO: Check if is a legal move 
-                
-                return Directions.REVERSE(inDanger) #Return the opposite direction of the danger so we can head that direction
 
+                legalMoves = state.getLegalActions()
+                reverseDirection = Directions.REVERSE[inDanger]
+                leftDirection = Directions.LEFT[inDanger]
+                rightDirection = Directions.RIGHT[inDanger]
 
+                if reverseDirection in legalMoves:
+                    return reverseDirection
+                elif leftDirection in legalMoves:
+                    return leftDirection
+                elif rightDirection in legalMoves:
+                    return rightDirection
+                elif inDanger in legalMoves:
+                    return inDanger
+                return Directions.STOP
+            
+        if heading == Directions.STOP:
+            # Pacman is stopped, assume North (true at beginning of game)
+            heading = Directions.NORTH
 
-        raise NotImplemented
+        # Turn left if possible
+        left = Directions.LEFT[heading]  # What is left based on current heading
+        if left in legal:
+            action = left
+        else:
+            # No left turn
+            if heading in legal:
+                action = heading  # continue in current direction
+            elif Directions.RIGHT[heading] in legal:
+                action = Directions.RIGHT[heading]  # Turn right
+            elif Directions.REVERSE[heading] in legal:
+                action = Directions.REVERSE[heading]  # Turn around
+            else:
+                action = Directions.STOP  # Can't move!
+
+        return action
